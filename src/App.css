@@ -1,0 +1,279 @@
+html, body {
+  font-family: sans-serif;
+  width: 100%;
+  height: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+.App {
+  width: 100%;
+  height: 100%;
+  font-family: 'Lato', sans-serif;
+}
+
+.container {
+  padding-top: 30px;
+  margin: 0 auto;
+  max-width: 1800px;
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-in-out;
+  transition-delay: 0.3s;
+}
+
+.container.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.group-tile,
+.knockout-tile {
+  width: 100%;
+  max-width: 400px;
+  margin: 8px;
+}
+
+.tile-title {
+  padding-bottom: 4px;
+}
+
+.tile-inner {
+  border: 1px solid #ccc;
+}
+
+.table-team,
+.table-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 8px;
+  font-size: 14px;
+}
+
+.table-team:nth-child(2) {
+  background-color: lightgreen;
+}
+
+.table-team:nth-child(3) {
+  background-color: lightblue;
+}
+
+.group-tile-table .team-position {
+  min-width: 48px;
+}
+
+.group-tile-table .team-name {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.group-tile-table .team-name span {
+  flex-grow: 1;
+}
+
+.team-name img {
+  width: 16px;
+  height: 12px;
+  margin-right: 8px;
+}
+
+.team-name img:not([src]) {
+  display: none;
+}
+
+.group-tile-table .team-goals,
+.group-tile-table .team-played,
+.group-tile-table .team-points {
+  min-width: 48px;
+  text-align: center;
+}
+
+.group-tile-expand {
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+.group-tile-expand .expand-inner {
+  display: none;
+  overflow: hidden;
+  transition: height 0.2s ease-in-out;
+}
+
+.group-tile-expand.expanded .expand-inner {
+  display: block;
+  padding: 8px;
+}
+
+.group-tile-expand .expand-button {
+  background: none;
+  color: inherit;
+  border: none;
+  border-top: 1px solid #ccc;
+  padding: 8px;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+  text-align: center;
+  width: 100%;
+  font-size: 14px;
+}
+
+.group-tile.finished .group-tile-table .table-team:nth-child(2),
+.group-tile.finished .group-tile-table .table-team:nth-child(3) {
+  font-weight: bold;
+}
+
+.fixture-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+}
+
+.fixture-item .fixture-teams {
+  display: flex;
+  justify-content: center;
+  flex: 2 0 0;
+}
+
+.fixture-item .team-name {
+  justify-content: flex-end;
+  display: flex;
+  align-items: center;
+  width: 80px;
+  min-width: 80px;
+  font-size: 14px;
+}
+
+.fixture-item .team-name.winner span {
+  font-weight: bold;
+}
+
+.fixture-item .team-name:last-child {
+  justify-content: flex-start;
+}
+
+.fixture-item .fixture-separator {
+  text-align: center;
+  padding: 0 8px;
+  cursor: help;
+  font-size: 14px;
+}
+
+.fixture-item .fixture-date {
+  flex: 1 0 0;
+}
+
+.fixture-item .fixture-date span {
+  display: block;
+  font-size: 10px;
+}
+
+.fixture-item .fixture-result {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex: 1 0 0;
+}
+
+.fixture-item .fixture-result input {
+  width: 30px;
+  text-align: center;
+}
+
+
+/*
+  KNOCKOUT CONTAINER
+*/
+
+.knockout-wrap {
+  width: 100%;
+  min-width: 100%;
+  min-height: 300px;
+  margin-top: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.knockout-wrap .knockout-tile:last-child {
+  max-width: 600px;
+}
+
+
+
+
+
+/* LOADING INDICATOR */
+.loading-indicator,
+.loading-indicator:after {
+  border-radius: 50%;
+  width: 10em;
+  height: 10em;
+  pointer-events: none;
+}
+
+.loading-indicator {
+  position: fixed;
+  top: calc(50% - 10em);
+  left: calc(50% - 5em);
+  margin: 0;
+  font-size: 10px;
+  text-indent: -9999em;
+  border-top: 1.1em solid rgba(180,22,27, 0.2);
+  border-right: 1.1em solid rgba(180,22,27, 0.2);
+  border-bottom: 1.1em solid rgba(180,22,27, 0.2);
+  border-left: 1.1em solid #ffffff;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-animation: load8 1.1s infinite linear;
+  animation: load8 1.1s infinite linear;
+
+  transition: opacity 0.1s ease-in-out;
+
+  opacity: 0;
+}
+
+.loading-indicator.active {
+  opacity: 1;
+}
+
+@-webkit-keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
