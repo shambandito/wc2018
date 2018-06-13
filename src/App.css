@@ -172,12 +172,12 @@ html, body {
 .fixture-item .fixture-separator {
   text-align: center;
   padding: 0 8px;
-  cursor: help;
   font-size: 14px;
 }
 
 .fixture-item .fixture-date {
   flex: 1 0 0;
+  cursor: help;
 }
 
 .fixture-item .fixture-date span {

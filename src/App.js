@@ -24,10 +24,10 @@ class App extends Component {
     this.getTournamentData = this.getTournamentData.bind(this);
     this.updateMatchDataForTeam = this.updateMatchDataForTeam.bind(this);
     this.updateMatchDataForGroup = this.updateMatchDataForGroup.bind(this);
-    this.onResultChange = this.onResultChange.bind(this);
+    this.onGroupResultChange = this.onGroupResultChange.bind(this);
+    this.onKnockoutResultChange = this.onKnockoutResultChange.bind(this);
 
     this.createGroups = this.createGroups.bind(this);
-    this.updateGroups = this.updateGroups.bind(this);
     this.updateTeamsInGroup = this.updateTeamsInGroup.bind(this);
     this.sortTeams = this.sortTeams.bind(this);
   }
@@ -84,9 +84,40 @@ class App extends Component {
     });
   }
 
-  onResultChange(options) {
+  onGroupResultChange(options) {
     this.setState((currentState) => {
-      const updatedGroups = this.updateGroups(currentState, options);
+      let updatedMatches, updatedGroup;
+
+      for(let key in currentState.groups) {
+        if(key !== options.stageId) continue; // only handle group that has changed
+
+        const group = currentState.groups[key];
+
+        const updatedMatch = {
+          ...group.matches.find(match => match.name === options.matchId),
+          [options.isHome ? "home_result" : "away_result"]: options.score
+        };
+
+        updatedMatches = currentState.groups[options.stageId].matches.map(match => {
+          return match.name === options.matchId ? updatedMatch : match;
+        });
+
+        updatedGroup = this.updateTeamsInGroup({
+          ...currentState.groups[options.stageId],
+          matches: updatedMatches
+        });
+
+        const groupNotFinished = updatedGroup.teams.some(team => team.played !== 3);
+
+        // set teams qualified for KO-round if all teams have played 3 games
+        updatedGroup.winner = !groupNotFinished ? updatedGroup.teams[0].id : null;
+        updatedGroup.runnerup = !groupNotFinished ? updatedGroup.teams[1].id : null;
+      }
+
+      const updatedGroups = {
+        ...currentState.groups,
+        [options.stageId]: updatedGroup
+      };
 
       return {
         ...currentState,
@@ -95,51 +126,56 @@ class App extends Component {
     });
   }
 
+  onKnockoutResultChange(options) {
+    this.setState((currentState) => {
+      const matches = currentState.knockout[options.stageId].matches;
+      const currentMatch = matches.find(match => match.name === options.matchId);
+
+      const updatedMatch = {
+        ...currentMatch,
+        [options.isHome ? "home_result" : "away_result"]: options.score
+      };
+
+      // match has valid result
+      if(typeof updatedMatch.home_result === "number" && typeof updatedMatch.away_result === "number") {
+        if(updatedMatch.home_result > updatedMatch.away_result) {
+          updatedMatch.winner = "home";
+        } else if(updatedMatch.home_result < updatedMatch.away_result) {
+          updatedMatch.winner = "away";
+        } else {
+          updatedMatch.winner = null;
+        }
+      }
+
+      const updatedMatches = matches.map(match => {
+        return match.name === options.matchId ? updatedMatch : match;
+      });
+
+      const updatedStage = {
+        ...currentState.knockout[options.stageId],
+        matches: updatedMatches
+      };
+
+      const updatedKnockout = {
+        ...currentState.knockout,
+        [options.stageId]: updatedStage
+      };
+
+      return {
+        ...currentState,
+        knockout: updatedKnockout
+      };
+    });
+  }
+
   createGroups() {
     const tiles = Object.keys(this.state.groups).map((key, index) => {
       const group = this.state.groups[key];
 
-      return <GroupTile key={index} groupData={group} teams={group.teams} onResultChange={this.onResultChange} />;
+      return <GroupTile key={index} groupData={group} teams={group.teams} onResultChange={this.onGroupResultChange} />;
     });
 
     return tiles;
-  }
-
-  updateGroups(currentState, options) {
-    let updatedMatches, updatedGroup;
-
-    for(let key in currentState.groups) {
-      if(key !== options.groupId) continue; // only check
-
-      const group = currentState.groups[key];
-
-      const updatedMatch = {
-        ...group.matches.find(match => match.name === options.matchId),
-        [options.isHome ? "home_result" : "away_result"]: parseInt(options.score, 10)
-      };
-
-      updatedMatches = currentState.groups[options.groupId].matches.map(match => {
-        return match.name === options.matchId ? updatedMatch : match;
-      });
-
-      updatedGroup = this.updateTeamsInGroup({
-        ...currentState.groups[options.groupId],
-        matches: updatedMatches
-      });
-
-      const groupNotFinished = updatedGroup.teams.some(team => team.played !== 3);
-
-      // set teams qualified for KO-round if all teams have played 3 games
-      updatedGroup.winner = !groupNotFinished ? updatedGroup.teams[0].id : null;
-      updatedGroup.runnerup = !groupNotFinished ? updatedGroup.teams[1].id : null;
-    }
-
-    const updatedGroups = {
-      ...currentState.groups,
-      [options.groupId]: updatedGroup
-    };
-
-    return updatedGroups;
   }
 
   updateTeamsInGroup(group) {
@@ -228,10 +264,17 @@ class App extends Component {
   }
 
   createKnockoutStages() {
-    const tiles = Object.keys(this.state.knockout).map((key, index) => {
-      const stage = this.state.knockout[key];
-
-      return <KnockoutTile key={index} stage={stage} groups={this.state.groups}/>;
+    const tiles = Object.keys(this.state.knockout).map((stageKey, index) => {
+      return (
+        <KnockoutTile
+          key={index}
+          id={stageKey}
+          stages={this.state.knockout}
+          teams={this.state.teams}
+          groups={this.state.groups}
+          onResultChange={this.onKnockoutResultChange}
+        />
+      );
     });
 
     return tiles;

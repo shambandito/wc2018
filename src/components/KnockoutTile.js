@@ -1,53 +1,184 @@
-import React from 'react';
+import React, { Component } from 'react';
 
 import FixtureItem from './FixtureItem';
 
-const STATUS_MAP = {
-    "runner": "runnerup",
-    "winner": "winner"
-}
-
 const LABELS_FOR_STATUS = {
-    "runnerup": "#2 Group ",
-    "winner": "#1 Group "
+    "winner": "#1 Group ",
+    "runner": "#2 Group "
 };
 
-const KnockoutTile = (props) => {
-    const stage = props.stage;
+const STAGE_IDS = {
+    SIXTEEN: "round_16",
+    QUARTER: "round_8",
+    SEMI: "round_4",
+    THIRDPLACE: "round_2_loser",
+    FINAL: "round_2"
+}
 
-    const getTeamObject = (team) => {
-        const [ status, groupLetter ] = team.split("_");
-        const team_status = STATUS_MAP[status]; // maps string from <team_a> to property name used in group object
-        const team_id = props.groups[groupLetter][team_status]; // gets ID of team that had <team_status> in the group
+class KnockoutTile extends Component {
+    constructor(props) {
+        super(props);
 
-        const placeholder = {
-            fifaCode: LABELS_FOR_STATUS[team_status] + groupLetter.toUpperCase()
+        this.getTeamObject = this.getTeamObject.bind(this);
+        this.createRound16Item = this.createRound16Item.bind(this);
+        this.createQuarterItem = this.createQuarterItem.bind(this);
+        this.createSemiItem = this.createSemiItem.bind(this);
+        this.createThirdPlaceItem = this.createThirdPlaceItem.bind(this);
+
+        this.getQuarterTeams = this.getQuarterTeams.bind(this);
+        this.getSemiTeams = this.getSemiTeams.bind(this);
+        this.getThirdPlaceTeams = this.getThirdPlaceTeams.bind(this);
+    }
+
+    createRound16Item(match) {
+        const home_team = this.getTeamObject(match.home_team);
+        const away_team = this.getTeamObject(match.away_team);
+
+        return <FixtureItem key={match.name} stageId={this.props.id} home={home_team} away={away_team} match={match} onResultChange={this.props.onResultChange}/>
+    }
+
+    createQuarterItem(match) {
+        const [home_team, away_team] = this.getQuarterTeams(match.home_team, match.away_team);
+
+        return <FixtureItem key={match.name} stageId={this.props.id} home={home_team} away={away_team} match={match} onResultChange={this.props.onResultChange}/>
+    }
+
+    createSemiItem(match) {
+        const [home_team, away_team] = this.getSemiTeams(match.home_team, match.away_team);
+
+        return <FixtureItem key={match.name} stageId={this.props.id} home={home_team} away={away_team} match={match} onResultChange={this.props.onResultChange}/>
+    }
+
+    createThirdPlaceItem(match) {
+        const [home_team, away_team] = this.getThirdPlaceTeams(match.home_team, match.away_team);
+
+        return <FixtureItem key={match.name} stageId={this.props.id} home={home_team} away={away_team} match={match} onResultChange={this.props.onResultChange}/>
+    }
+
+    /**
+     *
+     * @param {String} qualifier - The position and group of the team to be found
+     * @return {Object} Team object
+     */
+    getTeamObject(qualifier) {
+        const [ status, groupId ] = qualifier.split("_");
+        const group = this.props.groups[groupId];
+
+        let teamObj = {
+            fifaCode: LABELS_FOR_STATUS[status] + groupId.toUpperCase()
         };
 
-        const teamObj = typeof team_id === "number" ? props.groups[groupLetter].teams.find(team => team.id === team_id) : placeholder;
+        if(status === "winner" && !!group.winner) {
+            teamObj = group.teams[0];
+        } else if(status === "runner" && !!group.runnerup) {
+            teamObj = group.teams[1];
+        }
 
         return teamObj;
     };
 
-    return (
-        <div className="knockout-tile">
-            <h3 className="tile-title">{stage.name}</h3>
+    /**
+     *
+     * @param {Number} homeMatchId - Winner of the match with this ID is the home team of the quarter final
+     * @param {Number} awayMatchId - Winner of the match with his ID is the away team of the quarter final
+     * @return {Array} Team objects [home, away]
+     */
+    getQuarterTeams(homeMatchId, awayMatchId) {
+        const round16 = this.props.stages[STAGE_IDS.SIXTEEN];
 
-            <div className="tile-inner">
-                {stage.matches.map((match, index) => {
-                    if(match.type === "qualified") {
-                        const home_team = getTeamObject(match.home_team);
-                        const away_team = getTeamObject(match.away_team);
+        const round16ForQuarterHome = round16.matches.find(match => match.name === homeMatchId && !!match.winner);
+        const round16ForQuarterAway = round16.matches.find(match => match.name === awayMatchId && !!match.winner);
 
-                        return <FixtureItem key={index} groupId={stage.id} home={home_team} away={away_team} match={match} onResultChange={() => {}}/>
-                    } else {
-                        return <FixtureItem key={index} groupId={stage.id} home={""} away={""} match={match} onResultChange={() => {}}/>
-                    }
-                })}
+        let home_team = { fifaCode: "Winner M" + homeMatchId };
+        let away_team = { fifaCode: "Winner M" + awayMatchId };
+
+        if(round16ForQuarterHome) {
+            home_team = this.getTeamObject(round16ForQuarterHome[`${round16ForQuarterHome.winner}_team`]);
+        }
+
+        if(round16ForQuarterAway) {
+            away_team = this.getTeamObject(round16ForQuarterAway[`${round16ForQuarterAway.winner}_team`]);
+        }
+
+        return [home_team, away_team];
+    }
+
+    /**
+     *
+     * @param {Number} homeMatchId - Winner of the match with this ID is the home team of the semi final
+     * @param {Number} awayMatchId - Winner of the match with his ID is the away team of the semi final
+     * @return {Array} Team objects [home, away]
+     */
+    getSemiTeams(homeMatchId, awayMatchId) {
+        const roundQuarter = this.props.stages[STAGE_IDS.QUARTER];
+
+        const quarterForSemiHome = roundQuarter.matches.find(match => match.name === homeMatchId && !!match.winner) || {};
+        const quarterForSemiAway = roundQuarter.matches.find(match => match.name === awayMatchId && !!match.winner) || {};
+
+        const round16MatchA = quarterForSemiHome[`${quarterForSemiHome.winner}_team`] || homeMatchId;
+        const round16MatchB = quarterForSemiAway[`${quarterForSemiAway.winner}_team`] || awayMatchId;
+
+        const teams = this.getQuarterTeams(round16MatchA, round16MatchB);
+
+        return teams;
+    }
+
+    /**
+     *
+     * @param {Number} homeMatchId - Winner of the match with this ID is the home team of the third place playoff
+     * @param {Number} awayMatchId - Winner of the match with his ID is the away team of the third place playoff
+     * @return {Array} Team objects [home, away]
+     */
+    getThirdPlaceTeams(homeMatchId, awayMatchId) {
+        const roundSemi = this.props.stages[STAGE_IDS.SEMI];
+
+        const semiForThirdPlaceHome = roundSemi.matches[0].winner && roundSemi.matches[0] || {};
+        const semiForThirdPlaceAway = roundSemi.matches[1].winner && roundSemi.matches[1] || {};
+
+        //@TODO: PROVIDE THE CORRECT MATCH IDS TO GET THIRD PLACE TEAMS
+
+        const teams = this.getSemiTeams(semiForThirdPlaceHome.home_team, semiForThirdPlaceAway.away_team);
+
+        return teams;
+    }
+
+    render() {
+        const currentStage = this.props.stages[this.props.id];
+
+        return (
+            <div className="knockout-tile">
+                <h3 className="tile-title">{currentStage.name}</h3>
+                <div className="tile-inner">
+                    {currentStage.matches.map((match, index) => {
+                        let item = null;
+
+                        switch (this.props.id) {
+                            case STAGE_IDS.SIXTEEN:
+                                item = this.createRound16Item(match);
+                                break;
+                            case STAGE_IDS.QUARTER:
+                                item = this.createQuarterItem(match);
+                                break;
+                            case STAGE_IDS.SEMI:
+                                item = this.createSemiItem(match);
+                                break;
+                            case STAGE_IDS.THIRDPLACE:
+                                item = this.createThirdPlaceItem(match);
+                                break;
+                            case STAGE_IDS.FINAL:
+                                break;
+                            default:
+                                break;
+                        }
+
+                        return item;
+                    })}
+                </div>
             </div>
-
-        </div>
-    );
+        );
+    }
 };
+
+
 
 export default KnockoutTile;

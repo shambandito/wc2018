@@ -7,7 +7,7 @@ class FixtureItem extends Component {
         this.state = {
             homeResult: typeof props.match.home_result === "number" ? props.match.home_result : "",
             awayResult: typeof props.match.home_result === "number" ? props.match.away_result : ""
-        }
+        };
 
         this.isInputValid = this.isInputValid.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -20,58 +20,56 @@ class FixtureItem extends Component {
     handleInputChange(event, isHome) {
         if(!this.isInputValid(event.target.value)) return;
 
+        const value = event.target.value !== "" ? parseInt(event.target.value, 10) : "";
+
         this.setState({
-            [isHome ? "homeResult" : "awayResult"]: event.target.value
+            [isHome ? "homeResult" : "awayResult"]: value
         });
 
         this.props.onResultChange({
-            score: event.target.value,
-            groupId: this.props.groupId,
+            score: value,
+            stageId: this.props.stageId,
             matchId: this.props.match.name,
             isHome: isHome
         });
     }
 
     render() {
-        const props = this.props;
+        const date = new Date(this.props.match.date);
+        const matchAlreadyPlayed = !!this.props.match.alreadyPlayed;
 
-        const home = props.home;
-        const away = props.away;
+        const bothResultsValid = this.state.homeResult !== "" && this.state.awayResult !== "";
 
-        const date = new Date(props.match.date);
-        const matchAlreadyPlayed = !!props.match.alreadyPlayed;
+        const homeWon = bothResultsValid && this.state.homeResult > this.state.awayResult;
+        const awayWon = bothResultsValid && this.state.homeResult < this.state.awayResult;
 
         return (
             <div className="fixture-item">
-                <div className="fixture-date">
-                    <span>{date.toDateString()}</span>
-                    <span>{date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false})}</span>
-                </div>
+                <FixtureDate date={date} matchNumber={this.props.match.name} />
 
                 <div className="fixture-teams">
-                    <FixtureTeam teamData={home} winner={this.state.homeResult > this.state.awayResult} />
-                    <span className="fixture-separator" title={"Match " + props.match.name}>v</span>
-                    <FixtureTeam teamData={away} winner={this.state.awayResult > this.state.homeResult} />
+                    <FixtureTeam teamData={this.props.home} winner={homeWon} />
+                    <span className="fixture-separator">v</span>
+                    <FixtureTeam teamData={this.props.away} winner={awayWon} />
                 </div>
 
                 <div className="fixture-result">
-                    <input
-                        type="text"
-                        disabled={matchAlreadyPlayed}
-                        value={this.state.homeResult}
-                        onChange={(event) => { this.handleInputChange(event, true) }}
-                    />
+                    <ResultInput alreadyPlayed={matchAlreadyPlayed} result={this.state.homeResult} isHome={true} onChange={this.handleInputChange} />
                     <span className="fixture-separator">:</span>
-                    <input
-                        type="text"
-                        disabled={matchAlreadyPlayed}
-                        value={this.state.awayResult}
-                        onChange={(event) => { this.handleInputChange(event, false) }}
-                    />
+                    <ResultInput alreadyPlayed={matchAlreadyPlayed} result={this.state.awayResult} isHome={false} onChange={this.handleInputChange} />
                 </div>
             </div>
         );
     }
+};
+
+const FixtureDate = (props) => {
+    return (
+        <div className="fixture-date" title={"Match " + props.matchNumber}>
+            <span>{props.date.toDateString()}</span>
+            <span>{props.date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false}) + " (M" + props.matchNumber + ")"}</span>
+        </div>
+    );
 };
 
 const FixtureTeam = (props) => {
@@ -80,6 +78,17 @@ const FixtureTeam = (props) => {
             <img src={props.teamData.flag} alt={props.teamData.fifaCode}/>
             <span>{props.teamData.fifaCode}</span>
         </div>
+    );
+};
+
+const ResultInput = (props) => {
+    return (
+        <input
+            type="text"
+            disabled={props.alreadyPlayed}
+            value={props.result}
+            onChange={(event) => { props.onChange(event, props.isHome) }}
+        />
     );
 };
 
