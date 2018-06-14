@@ -43,7 +43,10 @@ class App extends Component {
       <div className="App">
         <div className={"loading-indicator " + (noDataYet ? "active" : "")}></div>
         <div className={"container " + (noDataYet ? "" : "active")}>
-          {this.createGroups()}
+          <h1 className="app-title">World Cup 2018 Planner</h1>
+          <div className="group-wrap">
+            {this.createGroups()}
+          </div>
           <div className="knockout-wrap">
             {this.createKnockoutStages()}
           </div>
@@ -64,15 +67,26 @@ class App extends Component {
 
         const teams = data.teams.slice(startIndex, endIndex);
 
+        for(let match of group.matches) {
+          if(match.name === 1) {
+            match.home_result = 1;
+            match.away_result = 0;
+          };
+
+          if(match.name === 2) {
+            match.home_result = 2;
+            match.away_result = 3;
+          };
+
+
+          match.alreadyPlayed = typeof match.home_result === "number" && typeof match.away_result === "number"; // set flag if match has already been played
+        }
+
         group.id = key;
         group = this.updateTeamsInGroup({
           ...group,
           teams
         });
-
-        for(let match of group.matches) {
-          match.alreadyPlayed = typeof match.home_result === "number" && typeof match.away_result === "number"; // set flag if match has already been played
-        }
 
         data.groups[key] = group;
       });

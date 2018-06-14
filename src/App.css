@@ -1,7 +1,12 @@
 html, body {
-  font-family: 'Noto-Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
+  background-color: var(--appBg);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Open Sans', serif;
 }
 
 * {
@@ -26,13 +31,19 @@ html, body {
 
 #root {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
 }
 
 .App {
   width: 100%;
-  height: 100%;
-  background-color: var(--appBg);
+  min-height: 100%;
+}
+
+.App .app-title {
+  color: var(--red);
+  font-weight: bold;
+  font-size: 24px;
+  text-align: center;
 }
 
 .App span {
@@ -51,16 +62,13 @@ html, body {
 
 .App input[disabled] {
   border: none;
+  color: var(--black);
 }
 
 .container {
   padding-top: 30px;
   margin: 0 auto;
   max-width: 1800px;
-
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
 
   opacity: 0;
   pointer-events: none;
@@ -73,11 +81,21 @@ html, body {
   pointer-events: auto;
 }
 
+.group-wrap,
+.knockout-wrap {
+  width: 100%;
+  min-width: 100%;
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 .group-tile,
 .knockout-tile {
   width: 100%;
   max-width: 360px;
-  margin: 16px 8px;
+  margin: 16px;
 }
 
 .tile-title {
@@ -213,9 +231,13 @@ html, body {
   transform: rotate(180deg);
 }
 
-.group-tile.finished .group-tile-table .table-team:nth-child(2),
-.group-tile.finished .group-tile-table .table-team:nth-child(3) {
+.group-tile.finished .group-tile-table .table-team:nth-child(2) span {
   font-weight: bold;
+  color: var(--darkgreen);
+}
+.group-tile.finished .group-tile-table .table-team:nth-child(3) span {
+  font-weight: bold;
+  color: var(--lightgreen);
 }
 
 .fixture-item {
@@ -247,6 +269,7 @@ html, body {
 
 .fixture-item .team-name.winner span {
   font-weight: bold;
+  color: var(--darkgreen);
 }
 
 .fixture-item .team-name:last-child {
@@ -280,17 +303,6 @@ html, body {
 /*
   KNOCKOUT CONTAINER
 */
-
-.knockout-wrap {
-  width: 100%;
-  min-width: 100%;
-  min-height: 300px;
-  margin-top: 48px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-}
 
 .knockout-wrap .knockout-tile:last-child {
   max-width: 600px;

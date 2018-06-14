@@ -70,8 +70,6 @@ const FixtureDate = (props) => {
     const weekDay = weekDays[props.date.getDay()]
     const day = props.date.getDate();
     const month = months[props.date.getMonth()];
-    const hour = props.date.getHours();
-    const minute = props.date.getMinutes();
 
     return (
         <div className="fixture-date" title={"Match " + props.matchNumber}>
