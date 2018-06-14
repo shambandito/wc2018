@@ -64,9 +64,18 @@ class FixtureItem extends Component {
 };
 
 const FixtureDate = (props) => {
+    const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const months = {5: "Jun", 6: "Jul"};
+
+    const weekDay = weekDays[props.date.getDay()]
+    const day = props.date.getDate();
+    const month = months[props.date.getMonth()];
+    const hour = props.date.getHours();
+    const minute = props.date.getMinutes();
+
     return (
         <div className="fixture-date" title={"Match " + props.matchNumber}>
-            <span>{props.date.toDateString()}</span>
+            <span>{`${weekDay}, ${month} ${day}`}</span>
             <span>{props.date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false}) + " (M" + props.matchNumber + ")"}</span>
         </div>
     );

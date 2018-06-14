@@ -24,6 +24,7 @@ class GroupFixtures extends Component {
 
       return (
         <div className={"group-tile-expand " + (this.state.expanded ? "expanded": "")}>
+          <button className="expand-button" onClick={ this.handleExpandPress }><i className="material-icons expand-icon">expand_more</i></button>
           <div className="expand-inner">
             {group.matches.map((match, index) => {
               const home_team = this.props.teams.find(team => team.id === match.home_team);
@@ -32,7 +33,7 @@ class GroupFixtures extends Component {
               return <FixtureItem key={index} stageId={group.id} home={home_team} away={away_team} match={match} onResultChange={this.props.onResultChange}/>
             })}
           </div>
-          <button className="expand-button" onClick={ this.handleExpandPress }>{this.state.expanded ? "Collapse" : "Expand"}</button>
+
         </div>
       );
     }

@@ -1,11 +1,27 @@
 html, body {
-  font-family: sans-serif;
+  font-family: 'Noto-Sans', sans-serif;
   width: 100%;
   height: 100%;
 }
 
 * {
   box-sizing: border-box;
+}
+
+:root {
+  --red: #D30208;
+  --black: #171714;
+  --gold: #E5C685;
+  --antique: #F5EED5;
+  --midnightblue: #015386;
+  --honolulublue: #0074B1;
+
+  --darkgreen: #388659;
+  --lightgreen: #52AA5E;
+
+  --border: #ccc;
+  --lightBg: #efefef;
+  --appBg: #fafafa;
 }
 
 #root {
@@ -16,7 +32,25 @@ html, body {
 .App {
   width: 100%;
   height: 100%;
-  font-family: 'Lato', sans-serif;
+  background-color: var(--appBg);
+}
+
+.App span {
+  color: var(--black);
+}
+
+.App input {
+  color: var(--midnightblue);
+  background-color: transparent;
+  border: 1px solid var(--midnightblue);
+  width: 24px;
+  height: 20px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.App input[disabled] {
+  border: none;
 }
 
 .container {
@@ -42,16 +76,17 @@ html, body {
 .group-tile,
 .knockout-tile {
   width: 100%;
-  max-width: 400px;
-  margin: 8px;
+  max-width: 360px;
+  margin: 16px 8px;
 }
 
 .tile-title {
-  padding-bottom: 4px;
+  color: var(--midnightblue);
+  font-weight: bold;
 }
 
 .tile-inner {
-  border: 1px solid #ccc;
+  /* border: 1px solid #ccc; */
 }
 
 .table-team,
@@ -59,16 +94,38 @@ html, body {
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 8px;
-  font-size: 14px;
+  padding: 16px;
+  padding-right: 0;
+  position: relative;
 }
 
-.table-team:nth-child(2) {
-  background-color: lightgreen;
+.table-header {
+  padding: 4px 0;
 }
 
-.table-team:nth-child(3) {
-  background-color: lightblue;
+.table-team:not(:last-child) {
+  border-bottom: 1px dashed var(--border);
+}
+
+.table-team:nth-child(even) {
+  background-color: var(--lightBg);
+}
+
+.table-team:before {
+  width: 8px;
+  height: calc(100% + 1px);
+  position: absolute;
+  content: "";
+  top: 0;
+  left: 0;
+}
+
+.table-team:nth-child(2):before {
+  background-color: var(--darkgreen);
+}
+
+.table-team:nth-child(3):before {
+  background-color: var(--lightgreen);
 }
 
 .group-tile-table .team-position {
@@ -87,8 +144,8 @@ html, body {
 }
 
 .team-name img {
-  width: 16px;
-  height: 12px;
+  width: 20px;
+  height: 14px;
   margin-right: 8px;
 }
 
@@ -101,37 +158,59 @@ html, body {
 .group-tile-table .team-points {
   min-width: 48px;
   text-align: center;
+  font-size: 12px;
 }
 
 .group-tile-expand {
-  border-left: 1px solid #ccc;
-  border-right: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
+  /* border-top: 1px dashed var(--border); */
 }
 
 .group-tile-expand .expand-inner {
-  display: none;
+  max-height: 0;
   overflow: hidden;
-  transition: height 0.2s ease-in-out;
+  transition: max-height 0.3s ease-in-out;
 }
 
 .group-tile-expand.expanded .expand-inner {
-  display: block;
-  padding: 8px;
+  max-height: 330px;
 }
 
 .group-tile-expand .expand-button {
   background: none;
   color: inherit;
   border: none;
-  border-top: 1px solid #ccc;
-  padding: 8px;
-  font: inherit;
+  padding: 0;
   cursor: pointer;
-  outline: inherit;
+  outline: none;
   text-align: center;
   width: 100%;
-  font-size: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+  background-color: var(--honolulublue);
+  opacity: 0.8;
+}
+
+.group-tile-expand .expand-button .expand-icon {
+  transition: transform 0.3s ease-out;
+  /* transition-delay: 0.25s; */
+  color: var(--appBg);
+}
+
+.group-tile-expand .expand-button:hover {
+  /* background-color: var(--midnightblue); */
+  opacity: 1;
+}
+
+.group-tile-expand .expand-button:active {
+  /* background-color: var(--red); */
+  opacity: 1;
+}
+
+.group-tile-expand.expanded .expand-button .expand-icon {
+  transform: rotate(180deg);
 }
 
 .group-tile.finished .group-tile-table .table-team:nth-child(2),
@@ -143,7 +222,12 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
+  padding: 16px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.fixture-item:nth-child(odd) {
+  background-color: var(--lightBg);
 }
 
 .fixture-item .fixture-teams {
@@ -192,11 +276,6 @@ html, body {
   flex: 1 0 0;
 }
 
-.fixture-item .fixture-result input {
-  width: 30px;
-  text-align: center;
-}
-
 
 /*
   KNOCKOUT CONTAINER
@@ -217,9 +296,9 @@ html, body {
   max-width: 600px;
 }
 
-
-
-
+.knockout-tile .tile-title {
+  padding-bottom: 4px;
+}
 
 /* LOADING INDICATOR */
 .loading-indicator,
@@ -237,10 +316,10 @@ html, body {
   margin: 0;
   font-size: 10px;
   text-indent: -9999em;
-  border-top: 1.1em solid rgba(180,22,27, 0.2);
-  border-right: 1.1em solid rgba(180,22,27, 0.2);
-  border-bottom: 1.1em solid rgba(180,22,27, 0.2);
-  border-left: 1.1em solid #ffffff;
+  border-top: 1.1em solid rgba(211, 2, 8, 0.5);
+  border-right: 1.1em solid rgba(211, 2, 8, 0.5);
+  border-bottom: 1.1em solid rgba(211, 2, 8, 0.5);
+  border-left: 1.1em solid var(--appBg);
   -webkit-transform: translateZ(0);
   -ms-transform: translateZ(0);
   transform: translateZ(0);

@@ -55,6 +55,12 @@ class KnockoutTile extends Component {
         return <FixtureItem key={match.name} stageId={this.props.id} home={home_team} away={away_team} match={match} onResultChange={this.props.onResultChange}/>
     }
 
+    createFinalItem(match) {
+        const [home_team, away_team] = this.getFinalTeams(match.home_team, match.away_team);
+
+        return <FixtureItem key={match.name} stageId={this.props.id} home={home_team} away={away_team} match={match} onResultChange={this.props.onResultChange}/>
+    }
+
     /**
      *
      * @param {String} qualifier - The position and group of the team to be found
@@ -125,19 +131,44 @@ class KnockoutTile extends Component {
 
     /**
      *
-     * @param {Number} homeMatchId - Winner of the match with this ID is the home team of the third place playoff
-     * @param {Number} awayMatchId - Winner of the match with his ID is the away team of the third place playoff
+     * @param {Number} homeMatchId - Loser of the match with this ID is the home team of the third place playoff
+     * @param {Number} awayMatchId - Loser of the match with his ID is the away team of the third place playoff
      * @return {Array} Team objects [home, away]
      */
     getThirdPlaceTeams(homeMatchId, awayMatchId) {
         const roundSemi = this.props.stages[STAGE_IDS.SEMI];
 
-        const semiForThirdPlaceHome = roundSemi.matches[0].winner && roundSemi.matches[0] || {};
-        const semiForThirdPlaceAway = roundSemi.matches[1].winner && roundSemi.matches[1] || {};
+        let quarterMatchA = homeMatchId;
+        let quarterMatchB = awayMatchId;
 
-        //@TODO: PROVIDE THE CORRECT MATCH IDS TO GET THIRD PLACE TEAMS
+        if(roundSemi.matches[0].winner === "home") {
+            quarterMatchA = roundSemi.matches[0].away_team;
+        } else if(roundSemi.matches[0].winner === "away") {
+            quarterMatchA = roundSemi.matches[0].home_team;
+        }
 
-        const teams = this.getSemiTeams(semiForThirdPlaceHome.home_team, semiForThirdPlaceAway.away_team);
+        if(roundSemi.matches[1].winner === "home") {
+            quarterMatchB = roundSemi.matches[1].away_team;
+        } else if(roundSemi.matches[1].winner === "away") {
+            quarterMatchB = roundSemi.matches[1].home_team;
+        }
+
+        const teams = this.getSemiTeams(quarterMatchA, quarterMatchB);
+
+        // ensure correct placeholder labels
+        teams[0].fifaCode = teams[0].fifaCode.indexOf(homeMatchId) > 0 ? "Loser M" + homeMatchId : teams[0].fifaCode;
+        teams[1].fifaCode = teams[1].fifaCode.indexOf(awayMatchId) > 0 ? "Loser M" + awayMatchId : teams[1].fifaCode;
+
+        return teams;
+    }
+
+    getFinalTeams(homeMatchId, awayMatchId) {
+        const roundSemi = this.props.stages[STAGE_IDS.SEMI];
+
+        const quarterMatchA = roundSemi.matches[0][`${roundSemi.matches[0].winner}_team`] || homeMatchId;
+        const quarterMatchB = roundSemi.matches[1][`${roundSemi.matches[1].winner}_team`] || awayMatchId;
+
+        const teams = this.getSemiTeams(quarterMatchA, quarterMatchB);
 
         return teams;
     }
@@ -147,7 +178,7 @@ class KnockoutTile extends Component {
 
         return (
             <div className="knockout-tile">
-                <h3 className="tile-title">{currentStage.name}</h3>
+                <h2 className="tile-title">{currentStage.name}</h2>
                 <div className="tile-inner">
                     {currentStage.matches.map((match, index) => {
                         let item = null;
@@ -166,6 +197,7 @@ class KnockoutTile extends Component {
                                 item = this.createThirdPlaceItem(match);
                                 break;
                             case STAGE_IDS.FINAL:
+                                item = this.createFinalItem(match);
                                 break;
                             default:
                                 break;

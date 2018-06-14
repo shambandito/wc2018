@@ -10,10 +10,8 @@ const GroupTile = (props) => {
 
     return (
         <div className={"group-tile " + (!!group.winner ? "finished" : "")}>
-            <h3 className="tile-title">{group.name}</h3>
-
             <div className="tile-inner">
-                <GroupTable teams={props.teams} />
+                <GroupTable name={group.name} teams={props.teams} />
             </div>
 
             <GroupFixtures groupData={group} teams={props.teams} onResultChange={props.onResultChange}/>

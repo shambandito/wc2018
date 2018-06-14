@@ -145,6 +145,8 @@ class App extends Component {
         } else {
           updatedMatch.winner = null;
         }
+      } else {
+        updatedMatch.winner = null;
       }
 
       const updatedMatches = matches.map(match => {
