@@ -64,10 +64,10 @@ class FixtureItem extends Component {
 };
 
 const FixtureDate = (props) => {
-    const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const months = {5: "Jun", 6: "Jul"};
 
-    const weekDay = weekDays[props.date.getDay()]
+    const weekDay = weekDays[props.date.getDay()];
     const day = props.date.getDate();
     const month = months[props.date.getMonth()];
 
