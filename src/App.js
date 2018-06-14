@@ -68,17 +68,6 @@ class App extends Component {
         const teams = data.teams.slice(startIndex, endIndex);
 
         for(let match of group.matches) {
-          if(match.name === 1) {
-            match.home_result = 1;
-            match.away_result = 0;
-          };
-
-          if(match.name === 2) {
-            match.home_result = 2;
-            match.away_result = 3;
-          };
-
-
           match.alreadyPlayed = typeof match.home_result === "number" && typeof match.away_result === "number"; // set flag if match has already been played
         }
 
