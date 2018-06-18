@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import './App.css';
+import './style/App.css';
 
 import GroupTile from './components/GroupTile';
 import KnockoutTile from './components/KnockoutTile';
+
+import TipGame from './components/TipGame/TipGame';
 
 //import DATA from './data/data';
 
@@ -18,7 +20,8 @@ class App extends Component {
       tvchannels: [],
       teams: [],
       groups: {},
-      knockout: {}
+      knockout: {},
+      tipGameActive: false
     };
 
     this.getTournamentData = this.getTournamentData.bind(this);
@@ -30,6 +33,8 @@ class App extends Component {
     this.createGroups = this.createGroups.bind(this);
     this.updateTeamsInGroup = this.updateTeamsInGroup.bind(this);
     this.sortTeams = this.sortTeams.bind(this);
+
+    this.toggleTipGame = this.toggleTipGame.bind(this);
   }
 
   componentDidMount() {
@@ -39,11 +44,15 @@ class App extends Component {
   render() {
     const noDataYet = Object.keys(this.state.groups).length === 0;
 
+    const tipGameData = JSON.parse(JSON.stringify(this.state));
+
     return (
       <div className="App">
         <div className={"loading-indicator " + (noDataYet ? "active" : "")}></div>
-        <div className={"container " + (noDataYet ? "" : "active")}>
+        <button onClick={this.toggleTipGame}>Toggle Tip Game</button>
+        <div className={"container " + (noDataYet ? "" : "active") + (this.state.tipGameActive ? " hide" : "")}>
           <h1 className="app-title">World Cup 2018 Planner</h1>
+
           <div className="group-wrap">
             {this.createGroups()}
           </div>
@@ -51,6 +60,7 @@ class App extends Component {
             {this.createKnockoutStages()}
           </div>
         </div>
+        <TipGame active={this.state.tipGameActive} data={tipGameData}/>
       </div>
     );
   }
@@ -283,6 +293,13 @@ class App extends Component {
     });
 
     return tiles;
+  }
+
+
+  toggleTipGame() {
+    this.setState({
+      tipGameActive: !this.state.tipGameActive
+    });
   }
 }
 

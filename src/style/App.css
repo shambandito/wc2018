@@ -50,7 +50,8 @@ h1, h2, h3, h4, h5, h6 {
   color: #171714;
 }
 
-.App input {
+.App .container input,
+.App .tip-list input {
   color: #015386;
   background-color: transparent;
   border: 1px solid #015386;
@@ -65,7 +66,8 @@ h1, h2, h3, h4, h5, h6 {
   color: #171714;
 }
 
-.container {
+.container,
+.tip-game-container {
   padding-top: 30px;
   margin: 0 auto;
   max-width: 1800px;
@@ -79,6 +81,10 @@ h1, h2, h3, h4, h5, h6 {
 .container.active {
   opacity: 1;
   pointer-events: auto;
+}
+
+.container.hide {
+  display: none;
 }
 
 .group-wrap,
@@ -311,6 +317,33 @@ h1, h2, h3, h4, h5, h6 {
 .knockout-tile .tile-title {
   padding-bottom: 4px;
 }
+
+
+
+/*
+  TIP GAME
+*/
+.tip-game-container {
+  display: none;
+}
+
+.tip-game-container.active {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tip-game-form {
+  margin-top: 16px;
+}
+
+.tip-game-container form input {
+  display: block;
+  margin-bottom: 8px;
+}
+
+
+
 
 /* LOADING INDICATOR */
 .loading-indicator,
