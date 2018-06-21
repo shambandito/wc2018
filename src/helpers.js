@@ -9,8 +9,8 @@ export function injectUserData(stageKey, matches, userData) {
 
         // get user entered data from local storage if available
         if(!match.alreadyPlayed && userData) {
-            const userDataGroup = isGroupMatch ? userData.groups[stageKey] : userData.knockout[stageKey];
-            const userDataMatch = userDataGroup.matches[i];
+            const userDataStage = isGroupMatch ? userData.groups[stageKey] : userData.knockout[stageKey];
+            const userDataMatch = userDataStage.matches[i];
 
             match.home_result = userDataMatch.home_result;
             match.away_result = userDataMatch.away_result;
@@ -32,9 +32,9 @@ export function getKnockoutMatchWinner(match) {
     let winner = null;
 
     if(hasValidResult && match.home_result > match.away_result) {
-        match.winner = "home";
+        winner = "home";
     } else if(hasValidResult && match.home_result < match.away_result) {
-        match.winner = "away";
+        winner = "away";
     }
 
     return winner;

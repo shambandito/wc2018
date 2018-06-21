@@ -90,6 +90,8 @@ class App extends Component {
         let stage = { ...data.knockout[key] };
 
         stage.matches = injectUserData(key, stage.matches, userData);
+
+        data.knockout[key] = stage;
       });
 
       this.setState(data);
