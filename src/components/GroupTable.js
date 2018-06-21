@@ -7,7 +7,6 @@ const GroupTable = (props) => {
       <div className="group-tile-table">
         <div className="table-header">
           <h2 className="tile-title">{props.name}</h2>
-          {/* <span className="team-position" title="Position">#</span> */}
           <span className="team-name"></span>
           <span className="team-played" title="Games Played">GP</span>
           <span className="team-goals" title="Goal Difference">GD</span>

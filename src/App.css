@@ -50,6 +50,7 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center;
   padding: 8px;
   color: #aaa;
+  line-height: 1.4;
 }
 
 .App span {
@@ -183,10 +184,7 @@ h1, h2, h3, h4, h5, h6 {
   min-width: 48px;
   text-align: center;
   font-size: 12px;
-}
-
-.group-tile-expand {
-  /* border-top: 1px dashed #ccc; */
+  cursor: help;
 }
 
 .group-tile-expand .expand-inner {
@@ -219,17 +217,14 @@ h1, h2, h3, h4, h5, h6 {
 
 .group-tile-expand .expand-button .expand-icon {
   transition: transform 0.3s ease-out;
-  /* transition-delay: 0.25s; */
   color: #fafafa;
 }
 
 .group-tile-expand .expand-button:hover {
-  /* background-color: #015386; */
   opacity: 1;
 }
 
 .group-tile-expand .expand-button:active {
-  /* background-color: #D30208; */
   opacity: 1;
 }
 

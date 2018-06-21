@@ -6,7 +6,7 @@ class FixtureItem extends Component {
 
         this.state = {
             homeResult: typeof props.match.home_result === "number" ? props.match.home_result : "",
-            awayResult: typeof props.match.home_result === "number" ? props.match.away_result : ""
+            awayResult: typeof props.match.away_result === "number" ? props.match.away_result : ""
         };
 
         this.isInputValid = this.isInputValid.bind(this);

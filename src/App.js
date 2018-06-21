@@ -4,6 +4,8 @@ import './App.css';
 import GroupTile from './components/GroupTile';
 import KnockoutTile from './components/KnockoutTile';
 
+import { injectUserData, getKnockoutMatchWinner } from './helpers';
+
 //import DATA from './data/data';
 
 const DATA_URL = "https://raw.githubusercontent.com/lsv/fifa-worldcup-2018/master/data.json";
@@ -44,7 +46,7 @@ class App extends Component {
         <div className={"loading-indicator " + (noDataYet ? "active" : "")}></div>
         <div className={"container " + (noDataYet ? "" : "active")}>
           <h1 className="app-title">World Cup 2018 Planner</h1>
-          <p className="app-info">(Be aware: any simulated results will be overwritten by the actual results)</p>
+          <p className="app-info">(Please note any simulated results will be overwritten by the actual results)</p>
           <div className="group-wrap">
             {this.createGroups()}
           </div>
@@ -62,30 +64,19 @@ class App extends Component {
     fetch(DATA_URL).then((result) => {
       return result.json();
     }).then((data) => {
+
+      // group matches
       Object.keys(data.groups).forEach((key, index) => {
-        let group = data.groups[key];
+        let group = { ...data.groups[key] };
 
         const startIndex = index * TEAMS_PER_GROUP;
         const endIndex = (index * TEAMS_PER_GROUP) + TEAMS_PER_GROUP;
 
         const teams = data.teams.slice(startIndex, endIndex);
 
-        for(let i = 0; i < group.matches.length; i++) {
-          const match = group.matches[i];
-
-          match.alreadyPlayed = typeof match.home_result === "number" && typeof match.away_result === "number"; // set flag if match has already been played
-
-          // get user entered data from local storage if available
-          if(!match.alreadyPlayed && userData) {
-            const userDataGroup = userData.groups[key];
-            const userDataMatch = userDataGroup.matches[i];
-
-            match.home_result = typeof userDataMatch.home_result === "number" ? userDataMatch.home_result : "";
-            match.away_result = typeof userDataMatch.away_result === "number" ? userDataMatch.away_result : "";
-          }
-        }
-
+        group.matches = injectUserData(key, group.matches, userData);
         group.id = key;
+
         group = this.updateTeamsInGroup({
           ...group,
           teams
@@ -94,23 +85,11 @@ class App extends Component {
         data.groups[key] = group;
       });
 
+      // knockout rounds
       Object.keys(data.knockout).forEach((key, index) => {
-        let stage = data.knockout[key];
+        let stage = { ...data.knockout[key] };
 
-        for(let i = 0; i < stage.matches.length; i++) {
-          const match = stage.matches[i];
-
-          match.alreadyPlayed = typeof match.home_result === "number" && typeof match.away_result === "number"; // set flag if match has already been played
-
-          // get user entered data from local storage if available
-          if(!match.alreadyPlayed && userData) {
-            const userDataStage = userData.knockout[key];
-            const userDataMatch = userDataStage.matches[i];
-
-            match.home_result = typeof userDataMatch.home_result === "number" ? userDataMatch.home_result : "";
-            match.away_result = typeof userDataMatch.away_result === "number" ? userDataMatch.away_result : "";
-          }
-        }
+        stage.matches = injectUserData(key, stage.matches, userData);
       });
 
       this.setState(data);
@@ -139,12 +118,6 @@ class App extends Component {
           ...currentState.groups[options.stageId],
           matches: updatedMatches
         });
-
-        const groupNotFinished = updatedGroup.teams.some(team => team.played !== 3);
-
-        // set teams qualified for KO-round if all teams have played 3 games
-        updatedGroup.winner = !groupNotFinished ? updatedGroup.teams[0].id : null;
-        updatedGroup.runnerup = !groupNotFinished ? updatedGroup.teams[1].id : null;
       }
 
       const updatedGroups = {
@@ -166,25 +139,13 @@ class App extends Component {
   onKnockoutResultChange(options) {
     this.setState((currentState) => {
       const matches = currentState.knockout[options.stageId].matches;
-      const currentMatch = matches.find(match => match.name === options.matchId);
 
       const updatedMatch = {
-        ...currentMatch,
+        ...matches.find(match => match.name === options.matchId),
         [options.isHome ? "home_result" : "away_result"]: options.score
       };
 
-      // match has valid result
-      if(typeof updatedMatch.home_result === "number" && typeof updatedMatch.away_result === "number") {
-        if(updatedMatch.home_result > updatedMatch.away_result) {
-          updatedMatch.winner = "home";
-        } else if(updatedMatch.home_result < updatedMatch.away_result) {
-          updatedMatch.winner = "away";
-        } else {
-          updatedMatch.winner = null;
-        }
-      } else {
-        updatedMatch.winner = null;
-      }
+      updatedMatch.winner = getKnockoutMatchWinner(updatedMatch);
 
       const updatedMatches = matches.map(match => {
         return match.name === options.matchId ? updatedMatch : match;
@@ -224,10 +185,18 @@ class App extends Component {
   updateTeamsInGroup(group) {
     const teams = this.sortTeams(this.updateMatchDataForGroup(group));
 
-    return {
+    const updatedGroup = {
       ...group,
       teams
     };
+
+    const groupNotFinished = updatedGroup.teams.some(team => team.played !== 3);
+
+    // set teams qualified for KO-round if all teams have played 3 games
+    updatedGroup.winner = !groupNotFinished ? updatedGroup.teams[0].id : null;
+    updatedGroup.runnerup = !groupNotFinished ? updatedGroup.teams[1].id : null;
+
+    return updatedGroup;
   }
 
   updateMatchDataForTeam(matches, teamId) {
