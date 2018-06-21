@@ -44,6 +44,7 @@ class App extends Component {
         <div className={"loading-indicator " + (noDataYet ? "active" : "")}></div>
         <div className={"container " + (noDataYet ? "" : "active")}>
           <h1 className="app-title">World Cup 2018 Planner</h1>
+          <p className="app-info">(Be aware: any simulated results will be overwritten by the actual results)</p>
           <div className="group-wrap">
             {this.createGroups()}
           </div>
@@ -56,6 +57,8 @@ class App extends Component {
   }
 
   getTournamentData() {
+    const userData = !!localStorage.getItem("userData") ? JSON.parse(localStorage.getItem("userData")) : null;
+
     fetch(DATA_URL).then((result) => {
       return result.json();
     }).then((data) => {
@@ -67,8 +70,19 @@ class App extends Component {
 
         const teams = data.teams.slice(startIndex, endIndex);
 
-        for(let match of group.matches) {
+        for(let i = 0; i < group.matches.length; i++) {
+          const match = group.matches[i];
+
           match.alreadyPlayed = typeof match.home_result === "number" && typeof match.away_result === "number"; // set flag if match has already been played
+
+          // get user entered data from local storage if available
+          if(!match.alreadyPlayed && userData) {
+            const userDataGroup = userData.groups[key];
+            const userDataMatch = userDataGroup.matches[i];
+
+            match.home_result = typeof userDataMatch.home_result === "number" ? userDataMatch.home_result : "";
+            match.away_result = typeof userDataMatch.away_result === "number" ? userDataMatch.away_result : "";
+          }
         }
 
         group.id = key;
@@ -80,10 +94,26 @@ class App extends Component {
         data.groups[key] = group;
       });
 
-      //@TODO: temp to show loading indicator
-      window.setTimeout(() => {
-        this.setState(data);
-      }, 1000);
+      Object.keys(data.knockout).forEach((key, index) => {
+        let stage = data.knockout[key];
+
+        for(let i = 0; i < stage.matches.length; i++) {
+          const match = stage.matches[i];
+
+          match.alreadyPlayed = typeof match.home_result === "number" && typeof match.away_result === "number"; // set flag if match has already been played
+
+          // get user entered data from local storage if available
+          if(!match.alreadyPlayed && userData) {
+            const userDataStage = userData.knockout[key];
+            const userDataMatch = userDataStage.matches[i];
+
+            match.home_result = typeof userDataMatch.home_result === "number" ? userDataMatch.home_result : "";
+            match.away_result = typeof userDataMatch.away_result === "number" ? userDataMatch.away_result : "";
+          }
+        }
+      });
+
+      this.setState(data);
     });
   }
 
@@ -122,10 +152,14 @@ class App extends Component {
         [options.stageId]: updatedGroup
       };
 
-      return {
+      const updatedState = {
         ...currentState,
         groups: updatedGroups
       };
+
+      localStorage.setItem("userData", JSON.stringify(updatedState));
+
+      return updatedState;
     });
   }
 
@@ -166,10 +200,14 @@ class App extends Component {
         [options.stageId]: updatedStage
       };
 
-      return {
+      const updatedState = {
         ...currentState,
         knockout: updatedKnockout
       };
+
+      localStorage.setItem("userData", JSON.stringify(updatedState));
+
+      return updatedState;
     });
   }
 
