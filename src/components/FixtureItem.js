@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 
 class FixtureItem extends Component {
     constructor(props) {
@@ -11,6 +12,8 @@ class FixtureItem extends Component {
 
         this.isInputValid = this.isInputValid.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleShowTooltip = this.handleShowTooltip.bind(this);
+        this.handleHideTooltip = this.handleHideTooltip.bind(this);
     }
 
     isInputValid(value) {
@@ -34,6 +37,27 @@ class FixtureItem extends Component {
         });
     }
 
+    handleShowTooltip() {
+        const domNode = ReactDOM.findDOMNode(this);
+
+        const offsetTop = domNode.offsetTop;
+
+        if(this.props.onShowTooltip) {
+            this.props.onShowTooltip({
+                offset: offsetTop,
+                stadium: this.props.match.stadium,
+                channels: this.props.match.channels,
+                matchNumber: this.props.match.name
+            });
+        }
+    }
+
+    handleHideTooltip() {
+        if(this.props.onHideTooltip) {
+            this.props.onHideTooltip();
+        }
+    }
+
     render() {
         const date = new Date(this.props.match.date);
         const matchAlreadyPlayed = !!this.props.match.alreadyPlayed;
@@ -45,7 +69,7 @@ class FixtureItem extends Component {
 
         return (
             <div className="fixture-item">
-                <FixtureDate date={date} matchNumber={this.props.match.name} />
+                <FixtureDate date={date} matchNumber={this.props.match.name} onMouseEnter={this.handleShowTooltip} onMouseLeave={this.handleHideTooltip} />
 
                 <div className="fixture-teams">
                     <FixtureTeam teamData={this.props.home} winner={homeWon} />
@@ -72,7 +96,7 @@ const FixtureDate = (props) => {
     const month = months[props.date.getMonth()];
 
     return (
-        <div className="fixture-date" title={"Match " + props.matchNumber}>
+        <div className="fixture-date" onMouseEnter={props.onMouseEnter} onMouseLeave={props.onMouseLeave}>
             <span>{`${weekDay}, ${month} ${day}`}</span>
             <span>{props.date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false}) + " (M" + props.matchNumber + ")"}</span>
         </div>

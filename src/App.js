@@ -178,7 +178,7 @@ class App extends Component {
     const tiles = Object.keys(this.state.groups).map((key, index) => {
       const group = this.state.groups[key];
 
-      return <GroupTile key={index} groupData={group} teams={group.teams} onResultChange={this.onGroupResultChange} />;
+      return <GroupTile key={index} groupData={group} teams={group.teams} stadiums={this.state.stadiums} channels={this.state.tvchannels} onResultChange={this.onGroupResultChange} />;
     });
 
     return tiles;
@@ -286,6 +286,8 @@ class App extends Component {
           stages={this.state.knockout}
           teams={this.state.teams}
           groups={this.state.groups}
+          stadiums={this.state.stadiums}
+          channels={this.state.tvchannels}
           onResultChange={this.onKnockoutResultChange}
         />
       );

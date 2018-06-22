@@ -14,7 +14,7 @@ const GroupTile = (props) => {
                 <GroupTable name={group.name} teams={props.teams} />
             </div>
 
-            <GroupFixtures groupData={group} teams={props.teams} onResultChange={props.onResultChange}/>
+            <GroupFixtures groupData={group} teams={props.teams} stadiums={props.stadiums} channels={props.channels} onResultChange={props.onResultChange}/>
         </div>
     );
 };

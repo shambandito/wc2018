@@ -53,7 +53,8 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.4;
 }
 
-.App span {
+.App span,
+.App p {
   color: #171714;
 }
 
@@ -103,6 +104,7 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%;
   max-width: 360px;
   margin: 16px;
+  position: relative;
 }
 
 .tile-title {
@@ -187,6 +189,10 @@ h1, h2, h3, h4, h5, h6 {
   cursor: help;
 }
 
+.group-tile-expand {
+  position: relative;
+}
+
 .group-tile-expand .expand-inner {
   max-height: 0;
   overflow: hidden;
@@ -241,12 +247,63 @@ h1, h2, h3, h4, h5, h6 {
   color: #52AA5E;
 }
 
+.fixture-tooltip {
+  position: absolute;
+  border: 1px solid #ccc;
+  padding: 8px;
+  bottom: 100%;
+  left: 0;
+  background-color: #fafafa;
+  width: 100%;
+  z-index: 999;
+  text-align: center;
+}
+
+.fixture-tooltip img {
+  max-width: 100%;
+  max-height: 150px;
+  height: auto;
+  margin-bottom: 4px;
+}
+
+.fixture-tooltip p {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.fixture-tooltip .tooltip-title {
+  color: #D30208;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.fixture-tooltip .tooltip-channels-header {
+  margin-top: 16px;
+  color: #015386;
+}
+
+.fixture-tooltip .tooltip-channels {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.fixture-tooltip .tooltip-channel {
+  max-width: 50px;
+  max-height: 30px;
+  width: auto;
+  height: auto;
+  margin: 12px 16px;
+}
+
 .fixture-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px 8px;
   border-bottom: 1px dashed #ccc;
+  position: relative;
 }
 
 .fixture-item:nth-child(odd) {
@@ -299,7 +356,6 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   flex: 1 0 0;
 }
-
 
 /*
   KNOCKOUT CONTAINER

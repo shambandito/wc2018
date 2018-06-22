@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import FixtureItem from './FixtureItem';
+import FixtureTooltip from './FixtureTooltip';
 
 const LABELS_FOR_STATUS = {
     "winner": "#1 Group ",
@@ -20,45 +21,43 @@ class KnockoutTile extends Component {
         super(props);
 
         this.getTeamObject = this.getTeamObject.bind(this);
-        this.createRound16Item = this.createRound16Item.bind(this);
-        this.createQuarterItem = this.createQuarterItem.bind(this);
-        this.createSemiItem = this.createSemiItem.bind(this);
-        this.createThirdPlaceItem = this.createThirdPlaceItem.bind(this);
+        this.createFixtureItem = this.createFixtureItem.bind(this);
 
         this.getQuarterTeams = this.getQuarterTeams.bind(this);
         this.getSemiTeams = this.getSemiTeams.bind(this);
         this.getThirdPlaceTeams = this.getThirdPlaceTeams.bind(this);
+
+        this.showTooltip = this.showTooltip.bind(this);
+        this.hideTooltip = this.hideTooltip.bind(this);
+
+        this.state = {
+            tooltip: null
+        };
     }
 
-    createRound16Item(match) {
-        const home_team = this.getTeamObject(match.home_team);
-        const away_team = this.getTeamObject(match.away_team);
+    showTooltip(options) {
+        const channels = options.channels.map((channelId) => {
+          return this.props.channels[channelId - 1];
+        });
 
-        return <FixtureItem key={match.name} stageId={this.props.id} home={home_team} away={away_team} match={match} onResultChange={this.props.onResultChange}/>
+        this.setState({
+          tooltip: {
+            stadium: this.props.stadiums[options.stadium - 1] || {},
+            channels: channels,
+            offset: options.offset,
+            matchNumber: options.matchNumber
+          }
+        });
     }
 
-    createQuarterItem(match) {
-        const [home_team, away_team] = this.getQuarterTeams(match.home_team, match.away_team);
-
-        return <FixtureItem key={match.name} stageId={this.props.id} home={home_team} away={away_team} match={match} onResultChange={this.props.onResultChange}/>
+    hideTooltip() {
+        this.setState({
+            tooltip: null
+        });
     }
 
-    createSemiItem(match) {
-        const [home_team, away_team] = this.getSemiTeams(match.home_team, match.away_team);
-
-        return <FixtureItem key={match.name} stageId={this.props.id} home={home_team} away={away_team} match={match} onResultChange={this.props.onResultChange}/>
-    }
-
-    createThirdPlaceItem(match) {
-        const [home_team, away_team] = this.getThirdPlaceTeams(match.home_team, match.away_team);
-
-        return <FixtureItem key={match.name} stageId={this.props.id} home={home_team} away={away_team} match={match} onResultChange={this.props.onResultChange}/>
-    }
-
-    createFinalItem(match) {
-        const [home_team, away_team] = this.getFinalTeams(match.home_team, match.away_team);
-
-        return <FixtureItem key={match.name} stageId={this.props.id} home={home_team} away={away_team} match={match} onResultChange={this.props.onResultChange}/>
+    createFixtureItem(match, home_team, away_team) {
+        return <FixtureItem key={match.name} stageId={this.props.id} home={home_team} away={away_team} match={match} onResultChange={this.props.onResultChange} onShowTooltip={this.showTooltip} onHideTooltip={this.hideTooltip} />
     }
 
     /**
@@ -180,24 +179,37 @@ class KnockoutTile extends Component {
             <div className="knockout-tile">
                 <h2 className="tile-title">{currentStage.name}</h2>
                 <div className="tile-inner">
-                    {currentStage.matches.map((match, index) => {
+                    {currentStage.matches.map((match) => {
                         let item = null;
+                        let home_team = null;
+                        let away_team = null;
 
                         switch (this.props.id) {
                             case STAGE_IDS.SIXTEEN:
-                                item = this.createRound16Item(match);
+                                home_team = this.getTeamObject(match.home_team);
+                                away_team = this.getTeamObject(match.away_team);
+
+                                item = this.createFixtureItem(match, home_team, away_team);
                                 break;
                             case STAGE_IDS.QUARTER:
-                                item = this.createQuarterItem(match);
+                                [home_team, away_team] = this.getQuarterTeams(match.home_team, match.away_team);
+
+                                item = this.createFixtureItem(match, home_team, away_team);
                                 break;
                             case STAGE_IDS.SEMI:
-                                item = this.createSemiItem(match);
+                                [home_team, away_team] = this.getSemiTeams(match.home_team, match.away_team);
+
+                                item = this.createFixtureItem(match, home_team, away_team);
                                 break;
                             case STAGE_IDS.THIRDPLACE:
-                                item = this.createThirdPlaceItem(match);
+                                [home_team, away_team] = this.getThirdPlaceTeams(match.home_team, match.away_team);
+
+                                item = this.createFixtureItem(match, home_team, away_team);
                                 break;
                             case STAGE_IDS.FINAL:
-                                item = this.createFinalItem(match);
+                                [home_team, away_team] = this.getFinalTeams(match.home_team, match.away_team);
+
+                                item = this.createFixtureItem(match, home_team, away_team);
                                 break;
                             default:
                                 break;
@@ -206,6 +218,8 @@ class KnockoutTile extends Component {
                         return item;
                     })}
                 </div>
+
+                {!!this.state.tooltip && <FixtureTooltip info={this.state.tooltip} />}
             </div>
         );
     }
