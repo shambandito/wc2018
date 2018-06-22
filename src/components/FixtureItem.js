@@ -93,7 +93,7 @@ const ResultInput = (props) => {
         <input
             type="text"
             pattern="[0-9]*"
-            inputmode="numeric"
+            inputMode="numeric"
             disabled={props.alreadyPlayed}
             value={props.result}
             onChange={(event) => { props.onChange(event, props.isHome) }}
