@@ -57,26 +57,45 @@ class KnockoutTile extends Component {
     }
 
     createFixtureItem(match, home_team, away_team) {
-        return <FixtureItem key={match.name} stageId={this.props.id} home={home_team} away={away_team} match={match} onResultChange={this.props.onResultChange} onShowTooltip={this.showTooltip} onHideTooltip={this.hideTooltip} />
+        return (
+            <FixtureItem 
+                key={match.name} 
+                stageId={this.props.id} 
+                home={home_team} 
+                away={away_team} 
+                match={match} 
+                onResultChange={this.props.onResultChange} 
+                onShowTooltip={this.showTooltip} 
+                onHideTooltip={this.hideTooltip} 
+            />
+        );
     }
 
     /**
      *
-     * @param {String} qualifier - The position and group of the team to be found
+     * @param {String/Number} qualifier - The position and group of the team to be found / the teamId of the qualifying team
      * @return {Object} Team object
      */
     getTeamObject(qualifier) {
-        const [ status, groupId ] = qualifier.split("_");
-        const group = this.props.groups[groupId];
+        let teamObj = null;
 
-        let teamObj = {
-            fifaCode: LABELS_FOR_STATUS[status] + groupId.toUpperCase()
-        };
+        // fix for when qualifier is a teamId instead of a string
+        if(typeof qualifier === "number") {
+            teamObj = this.props.teams[qualifier - 1];
+        } else {
+            const [ status, groupId ] = qualifier.split("_");
 
-        if(status === "winner" && !!group.winner) {
-            teamObj = group.teams[0];
-        } else if(status === "runner" && !!group.runnerup) {
-            teamObj = group.teams[1];
+            const group = this.props.groups[groupId];
+    
+            teamObj = {
+                fifaCode: LABELS_FOR_STATUS[status] + groupId.toUpperCase()
+            };
+    
+            if(status === "winner" && !!group.winner) {
+                teamObj = group.teams[0];
+            } else if(status === "runner" && !!group.runnerup) {
+                teamObj = group.teams[1];
+            }
         }
 
         return teamObj;
@@ -131,7 +150,7 @@ class KnockoutTile extends Component {
     /**
      *
      * @param {Number} homeMatchId - Loser of the match with this ID is the home team of the third place playoff
-     * @param {Number} awayMatchId - Loser of the match with his ID is the away team of the third place playoff
+     * @param {Number} awayMatchId - Loser of the match with this ID is the away team of the third place playoff
      * @return {Array} Team objects [home, away]
      */
     getThirdPlaceTeams(homeMatchId, awayMatchId) {
@@ -180,7 +199,6 @@ class KnockoutTile extends Component {
                 <h2 className="tile-title">{currentStage.name}</h2>
                 <div className="tile-inner">
                     {currentStage.matches.map((match) => {
-                        let item = null;
                         let home_team = null;
                         let away_team = null;
 
@@ -188,32 +206,24 @@ class KnockoutTile extends Component {
                             case STAGE_IDS.SIXTEEN:
                                 home_team = this.getTeamObject(match.home_team);
                                 away_team = this.getTeamObject(match.away_team);
-
-                                item = this.createFixtureItem(match, home_team, away_team);
                                 break;
                             case STAGE_IDS.QUARTER:
                                 [home_team, away_team] = this.getQuarterTeams(match.home_team, match.away_team);
-
-                                item = this.createFixtureItem(match, home_team, away_team);
                                 break;
                             case STAGE_IDS.SEMI:
                                 [home_team, away_team] = this.getSemiTeams(match.home_team, match.away_team);
-
-                                item = this.createFixtureItem(match, home_team, away_team);
                                 break;
                             case STAGE_IDS.THIRDPLACE:
                                 [home_team, away_team] = this.getThirdPlaceTeams(match.home_team, match.away_team);
-
-                                item = this.createFixtureItem(match, home_team, away_team);
                                 break;
                             case STAGE_IDS.FINAL:
                                 [home_team, away_team] = this.getFinalTeams(match.home_team, match.away_team);
-
-                                item = this.createFixtureItem(match, home_team, away_team);
                                 break;
                             default:
                                 break;
                         }
+
+                        const item = this.createFixtureItem(match, home_team, away_team);
 
                         return item;
                     })}
