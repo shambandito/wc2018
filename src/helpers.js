@@ -5,7 +5,7 @@ export function injectUserData(stageKey, matches, userData) {
         const match = { ...matches[i] };
         const isGroupMatch = match.type === "group";
 
-        match.alreadyPlayed = matchHasValidResult(match);
+        match.alreadyPlayed = matchHasValidResult(match) || match.finished;
 
         // get user entered data from local storage if available
         if(!match.alreadyPlayed && userData) {

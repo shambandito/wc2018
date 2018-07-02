@@ -112,10 +112,6 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: bold;
 }
 
-.tile-inner {
-  /* border: 1px solid #ccc; */
-}
-
 .table-team,
 .table-header {
   display: flex;
@@ -333,6 +329,11 @@ h1, h2, h3, h4, h5, h6 {
 .fixture-item .team-name.winner span {
   font-weight: bold;
   color: #388659;
+}
+
+.fixture-item .team-name.winner .penalty-indicator {
+  font-size: 11px;
+  margin-left: 4px;
 }
 
 .fixture-item .team-name:last-child {

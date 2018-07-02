@@ -73,30 +73,11 @@ class KnockoutTile extends Component {
 
     /**
      *
-     * @param {String/Number} qualifier - The position and group of the team to be found / the teamId of the qualifying team
+     * @param {Number} teamId
      * @return {Object} Team object
      */
-    getTeamObject(qualifier) {
-        let teamObj = null;
-
-        // fix for when qualifier is a teamId instead of a string
-        if(typeof qualifier === "number") {
-            teamObj = this.props.teams[qualifier - 1];
-        } else {
-            const [ status, groupId ] = qualifier.split("_");
-
-            const group = this.props.groups[groupId];
-    
-            teamObj = {
-                fifaCode: LABELS_FOR_STATUS[status] + groupId.toUpperCase()
-            };
-    
-            if(status === "winner" && !!group.winner) {
-                teamObj = group.teams[0];
-            } else if(status === "runner" && !!group.runnerup) {
-                teamObj = group.teams[1];
-            }
-        }
+    getTeamObject(teamId) {
+        let teamObj = this.props.teams[teamId - 1];
 
         return teamObj;
     };
@@ -110,18 +91,36 @@ class KnockoutTile extends Component {
     getQuarterTeams(homeMatchId, awayMatchId) {
         const round16 = this.props.stages[STAGE_IDS.SIXTEEN];
 
-        const round16ForQuarterHome = round16.matches.find(match => match.name === homeMatchId && !!match.winner);
-        const round16ForQuarterAway = round16.matches.find(match => match.name === awayMatchId && !!match.winner);
-
         let home_team = { fifaCode: "Winner M" + homeMatchId };
         let away_team = { fifaCode: "Winner M" + awayMatchId };
 
-        if(round16ForQuarterHome) {
-            home_team = this.getTeamObject(round16ForQuarterHome[`${round16ForQuarterHome.winner}_team`]);
+        /**
+         * Small dumb hack to account for changes to the json data structure during the tournament.
+         * 
+         * When the teams for a match are determined during the tournament the numbers in "home_team" and "away_team" of a KO match 
+         * change from the match ID of the match producing the competing team to the actual team ID
+         * 
+         * Seeing as the match IDs used to get teams in the KO stage is always > 32 we know thatt any parameter < 32 
+         * is always a team ID and not a match ID.
+         */
+        if(homeMatchId < 32) {
+            home_team = this.getTeamObject(homeMatchId);
+        } else {
+            const round16ForQuarterHome = round16.matches.find(match => match.name === homeMatchId && !!match.winner);
+
+            if(round16ForQuarterHome) {
+                home_team = this.getTeamObject(round16ForQuarterHome[`${round16ForQuarterHome.winner}_team`]);
+            }
         }
 
-        if(round16ForQuarterAway) {
-            away_team = this.getTeamObject(round16ForQuarterAway[`${round16ForQuarterAway.winner}_team`]);
+        if(awayMatchId < 32) {   
+            away_team = this.getTeamObject(awayMatchId);
+        } else {
+            const round16ForQuarterAway = round16.matches.find(match => match.name === awayMatchId && !!match.winner);
+
+            if(round16ForQuarterAway) {
+                away_team = this.getTeamObject(round16ForQuarterAway[`${round16ForQuarterAway.winner}_team`]);
+            }
         }
 
         return [home_team, away_team];
@@ -134,15 +133,22 @@ class KnockoutTile extends Component {
      * @return {Array} Team objects [home, away]
      */
     getSemiTeams(homeMatchId, awayMatchId) {
-        const roundQuarter = this.props.stages[STAGE_IDS.QUARTER];
+        let teams = null;        
 
-        const quarterForSemiHome = roundQuarter.matches.find(match => match.name === homeMatchId && !!match.winner) || {};
-        const quarterForSemiAway = roundQuarter.matches.find(match => match.name === awayMatchId && !!match.winner) || {};
+        // see comment in "getQuarterTeams" function
+        if(homeMatchId < 32 && awayMatchId < 32) {
+            teams = [this.getTeamObject(homeMatchId), this.getTeamObject(awayMatchId)];
+        } else {
+            const roundQuarter = this.props.stages[STAGE_IDS.QUARTER];
 
-        const round16MatchA = quarterForSemiHome[`${quarterForSemiHome.winner}_team`] || homeMatchId;
-        const round16MatchB = quarterForSemiAway[`${quarterForSemiAway.winner}_team`] || awayMatchId;
-
-        const teams = this.getQuarterTeams(round16MatchA, round16MatchB);
+            const quarterForSemiHome = roundQuarter.matches.find(match => match.name === homeMatchId && !!match.winner) || {};
+            const quarterForSemiAway = roundQuarter.matches.find(match => match.name === awayMatchId && !!match.winner) || {};
+    
+            const round16MatchA = quarterForSemiHome[`${quarterForSemiHome.winner}_team`] || homeMatchId;
+            const round16MatchB = quarterForSemiAway[`${quarterForSemiAway.winner}_team`] || awayMatchId;
+    
+            teams = this.getQuarterTeams(round16MatchA, round16MatchB);
+        }
 
         return teams;
     }
@@ -154,39 +160,54 @@ class KnockoutTile extends Component {
      * @return {Array} Team objects [home, away]
      */
     getThirdPlaceTeams(homeMatchId, awayMatchId) {
-        const roundSemi = this.props.stages[STAGE_IDS.SEMI];
+        let teams = null;
 
-        let quarterMatchA = homeMatchId;
-        let quarterMatchB = awayMatchId;
+        // see comment in "getQuarterTeams" function
+        if(homeMatchId < 32 && awayMatchId < 32) {
+            teams = [this.getTeamObject(homeMatchId), this.getTeamObject(awayMatchId)];
+        } else {
+            const roundSemi = this.props.stages[STAGE_IDS.SEMI];
 
-        if(roundSemi.matches[0].winner === "home") {
-            quarterMatchA = roundSemi.matches[0].away_team;
-        } else if(roundSemi.matches[0].winner === "away") {
-            quarterMatchA = roundSemi.matches[0].home_team;
+            let quarterMatchA = homeMatchId;
+            let quarterMatchB = awayMatchId;
+    
+            if(roundSemi.matches[0].winner === "home") {
+                quarterMatchA = roundSemi.matches[0].away_team;
+            } else if(roundSemi.matches[0].winner === "away") {
+                quarterMatchA = roundSemi.matches[0].home_team;
+            }
+    
+            if(roundSemi.matches[1].winner === "home") {
+                quarterMatchB = roundSemi.matches[1].away_team;
+            } else if(roundSemi.matches[1].winner === "away") {
+                quarterMatchB = roundSemi.matches[1].home_team;
+            }
+    
+            teams = this.getSemiTeams(quarterMatchA, quarterMatchB);
+    
+            // ensure correct placeholder labels
+            teams[0].fifaCode = teams[0].fifaCode.indexOf(homeMatchId) > 0 ? "Loser M" + homeMatchId : teams[0].fifaCode;
+            teams[1].fifaCode = teams[1].fifaCode.indexOf(awayMatchId) > 0 ? "Loser M" + awayMatchId : teams[1].fifaCode;
+    
         }
-
-        if(roundSemi.matches[1].winner === "home") {
-            quarterMatchB = roundSemi.matches[1].away_team;
-        } else if(roundSemi.matches[1].winner === "away") {
-            quarterMatchB = roundSemi.matches[1].home_team;
-        }
-
-        const teams = this.getSemiTeams(quarterMatchA, quarterMatchB);
-
-        // ensure correct placeholder labels
-        teams[0].fifaCode = teams[0].fifaCode.indexOf(homeMatchId) > 0 ? "Loser M" + homeMatchId : teams[0].fifaCode;
-        teams[1].fifaCode = teams[1].fifaCode.indexOf(awayMatchId) > 0 ? "Loser M" + awayMatchId : teams[1].fifaCode;
 
         return teams;
     }
 
     getFinalTeams(homeMatchId, awayMatchId) {
-        const roundSemi = this.props.stages[STAGE_IDS.SEMI];
+        let teams = null;
 
-        const quarterMatchA = roundSemi.matches[0][`${roundSemi.matches[0].winner}_team`] || homeMatchId;
-        const quarterMatchB = roundSemi.matches[1][`${roundSemi.matches[1].winner}_team`] || awayMatchId;
+        // see comment in "getQuarterTeams" function
+        if(homeMatchId < 32 && awayMatchId < 32) { 
+            teams = [this.getTeamObject(homeMatchId), this.getTeamObject(awayMatchId)];
+        } else {
+            const roundSemi = this.props.stages[STAGE_IDS.SEMI];
 
-        const teams = this.getSemiTeams(quarterMatchA, quarterMatchB);
+            const quarterMatchA = roundSemi.matches[0][`${roundSemi.matches[0].winner}_team`] || homeMatchId;
+            const quarterMatchB = roundSemi.matches[1][`${roundSemi.matches[1].winner}_team`] || awayMatchId;
+    
+            teams = this.getSemiTeams(quarterMatchA, quarterMatchB);
+        }
 
         return teams;
     }

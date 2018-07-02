@@ -64,17 +64,25 @@ class FixtureItem extends Component {
 
         const bothResultsValid = this.state.homeResult !== "" && this.state.awayResult !== "";
 
-        const homeWon = bothResultsValid && this.state.homeResult > this.state.awayResult;
-        const awayWon = bothResultsValid && this.state.homeResult < this.state.awayResult;
+        let homeWon = bothResultsValid && this.state.homeResult > this.state.awayResult;
+        let awayWon = bothResultsValid && this.state.homeResult < this.state.awayResult;
+        let penaltyWin = false;
+
+        // match went to penalties
+        if(bothResultsValid && typeof this.props.match.home_penalty === "number" && typeof this.props.match.away_penalty === "number") {
+            homeWon = this.props.match.home_penalty > this.props.match.away_penalty;
+            awayWon = this.props.match.home_penalty < this.props.match.away_penalty
+            penaltyWin = true;
+        }
 
         return (
             <div className="fixture-item">
                 <FixtureDate date={date} matchNumber={this.props.match.name} onMouseEnter={this.handleShowTooltip} onMouseLeave={this.handleHideTooltip} />
 
                 <div className="fixture-teams">
-                    <FixtureTeam teamData={this.props.home} winner={homeWon} />
+                    <FixtureTeam teamData={this.props.home} winner={homeWon} penalties={penaltyWin}/>
                     <span className="fixture-separator">v</span>
-                    <FixtureTeam teamData={this.props.away} winner={awayWon} />
+                    <FixtureTeam teamData={this.props.away} winner={awayWon} penalties={penaltyWin}/>
                 </div>
 
                 <div className="fixture-result">
@@ -105,9 +113,10 @@ const FixtureDate = (props) => {
 
 const FixtureTeam = (props) => {
     return (
-        <div className={"team-name " + (props.winner ? "winner" : "")} title={props.teamData.name}>
+        <div className={"team-name " + (props.winner ? "winner " : "")} title={props.teamData.name}>
             <img src={props.teamData.flag} alt={props.teamData.fifaCode}/>
             <span>{props.teamData.fifaCode}</span>
+            {props.penalties && props.winner && <span className="penalty-indicator">(P)</span>}
         </div>
     );
 };

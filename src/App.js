@@ -147,7 +147,9 @@ class App extends Component {
         [options.isHome ? "home_result" : "away_result"]: options.score
       };
 
-      updatedMatch.winner = getKnockoutMatchWinner(updatedMatch);
+      if(!updatedMatch.finished) {
+        updatedMatch.winner = getKnockoutMatchWinner(updatedMatch);
+      }
 
       const updatedMatches = matches.map(match => {
         return match.name === options.matchId ? updatedMatch : match;
