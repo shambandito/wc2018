@@ -196,6 +196,14 @@ class App extends Component {
 
     const groupNotFinished = updatedGroup.teams.some(team => team.played !== 3);
 
+    // fix for same points and goals in group H
+    if(group.name === "Group H") {
+      const jpn = updatedGroup.teams[2];
+
+      updatedGroup.teams[2] = updatedGroup.teams[1];
+      updatedGroup.teams[1] = jpn;
+    }
+
     // set teams qualified for KO-round if all teams have played 3 games
     updatedGroup.winner = !groupNotFinished ? updatedGroup.teams[0].id : null;
     updatedGroup.runnerup = !groupNotFinished ? updatedGroup.teams[1].id : null;

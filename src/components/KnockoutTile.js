@@ -3,11 +3,6 @@ import React, { Component } from 'react';
 import FixtureItem from './FixtureItem';
 import FixtureTooltip from './FixtureTooltip';
 
-const LABELS_FOR_STATUS = {
-    "winner": "#1 Group ",
-    "runner": "#2 Group "
-};
-
 const STAGE_IDS = {
     SIXTEEN: "round_16",
     QUARTER: "round_8",
